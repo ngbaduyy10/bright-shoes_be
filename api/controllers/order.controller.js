@@ -25,20 +25,14 @@ module.exports.createOrder = async (req, res) => {
     }
 }
 
-module.exports.getOrders = async (req, res) => {
+module.exports.getOrdersByUserId = async (req, res) => {
     try {
         const userId = req.params.id;
 
         const orderItemSql = `
-            SELECT 
-                oi.id AS order_item_id,
-                oi.shoes_id,
-                oi.quantity,
-                oi.price,
-            FROM orders o
-            JOIN order_item oi ON o.id = oi.order_id
-            WHERE o.user_id = ?
-            ORDER BY o.created_at DESC;
+            SELECT * FROM \`order\`
+            WHERE user_id = ?
+            ORDER BY created_at DESC
         `;
 
         const [orders] = await db.query(orderItemSql, [userId]);
