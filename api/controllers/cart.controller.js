@@ -2,7 +2,7 @@ const db = require('../../config/database');
 
 const getUpdatedCart = async (userId) => {
     const [cart] = await db.query(
-        "SELECT c.id, s.id AS shoes_id, s.name, s.price, s.image, ci.quantity FROM cart c " +
+        "SELECT c.id, s.id AS shoes_id, s.name, s.price, s.image_url, ci.quantity FROM cart c " +
         "JOIN cart_item ci ON c.id = ci.cart_id " +
         "JOIN shoes s ON ci.shoes_id = s.id " +
         "WHERE c.user_id = ?",
@@ -30,12 +30,12 @@ module.exports.addToCart = async (req, res) => {
         const cartId = cart[0].id;
 
         let [cartItem] = await db.query(
-            "SELECT id, quantity FROM cart_item WHERE cart_id = ? AND shoes_id = ?",
+            "SELECT * FROM cart_item WHERE cart_id = ? AND shoes_id = ?",
             [cartId, shoesId]
         );
 
         if (cartItem.length > 0) {
-            await db.query("UPDATE cart_item SET quantity = quantity + 1 WHERE id = ?", [cartItem[0].id]);
+            await db.query("UPDATE cart_item SET quantity = quantity + 1 WHERE cart_id = ? AND shoes_id = ?", [cartId, shoesId]);
         } else {
             await db.query("INSERT INTO cart_item (cart_id, shoes_id, quantity) VALUES (?, ?, ?)", [cartId,  shoesId,  1]);
         }
@@ -87,14 +87,14 @@ module.exports.updateCartItem = async (req, res) => {
         }
 
         const [cartItem] = await db.query(
-            "SELECT id FROM cart_item WHERE cart_id = ? AND shoes_id = ?",
+            "SELECT * FROM cart_item WHERE cart_id = ? AND shoes_id = ?",
             [cart[0].id, shoesId]
         );
         if (cartItem.length === 0) {
             return res.status(404).json({ message: "Item not found in cart" });
         }
 
-        await db.query("UPDATE cart_item SET quantity = ? WHERE id = ?", [quantity, cartItem[0].id]);
+        await db.query("UPDATE cart_item SET quantity = ? WHERE cart_id = ? AND shoes_id = ?", [quantity, cart[0].id, shoesId]);
 
         const updatedCart = await getUpdatedCart(userId);
         const totalPrice = updatedCart.reduce((total, item) => total + item.price * item.quantity, 0);
@@ -121,14 +121,14 @@ module.exports.deleteCartItem = async (req, res) => {
         }
 
         const [cartItem] = await db.query(
-            "SELECT id FROM cart_item WHERE cart_id = ? AND shoes_id = ?",
+            "SELECT * FROM cart_item WHERE cart_id = ? AND shoes_id = ?",
             [cart[0].id, shoesId]
         );
         if (cartItem.length === 0) {
             return res.status(404).json({ message: "Item not found in cart" });
         }
 
-        await db.query("DELETE FROM cart_item WHERE id = ?", [cartItem[0].id]);
+        await db.query("DELETE FROM cart_item WHERE cart_id = ? AND shoes_id = ?", [cart[0].id, shoesId]);
 
         const updatedCart = await getUpdatedCart(userId);
         const totalPrice = updatedCart.reduce((total, item) => total + item.price * item.quantity, 0);

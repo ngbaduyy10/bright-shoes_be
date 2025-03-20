@@ -9,13 +9,13 @@ module.exports.webhook = async (req, res) => {
     const imageUrl = data.image_url;
 
     const userSql = `
-        INSERT INTO user (id, email, firstName, lastName, imageUrl)
+        INSERT INTO user (id, email, first_name, last_name, image_url)
         VALUES (?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
              email = VALUES(email),
-             firstName = VALUES(firstName),
-             lastName = VALUES(lastName),
-             imageUrl = VALUES(imageUrl)
+             first_name = VALUES(first_name),
+             last_name = VALUES(last_name),
+             image_url = VALUES(image_url)
     `;
 
     const customerSql = `
