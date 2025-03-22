@@ -5,7 +5,7 @@ module.exports.getAddresses = async (req, res) => {
         const { userId } = req.params;
 
         const sql = `
-            SELECT id, street, city, state, zip_code, country, phone_number  FROM address WHERE user_id = ?
+            SELECT * FROM address WHERE user_id = ?
         `;
 
         const [addresses] = await db.query(sql, [userId]);
@@ -20,9 +20,9 @@ module.exports.getAddresses = async (req, res) => {
 
 module.exports.addAddress = async (req, res) => {
     try {
-        const { userId, street, city, state, zip_code, country, phone_number } = req.body;
+        const { userId, street, ward, district, city, country, phone } = req.body;
 
-        if (!street || !city || !state || !zip_code || !country || !phone_number) {
+        if (!street || !city || !ward || !district || !country || !phone) {
             return res.json({
                 success: false,
                 message: "Please fill in all fields"
@@ -30,11 +30,11 @@ module.exports.addAddress = async (req, res) => {
         }
 
         const sql = `
-            INSERT INTO address (user_id, street, city, state, zip_code, country, phone_number)
+            INSERT INTO address (user_id, street, ward, district, city, country, phone)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
 
-        await db.query(sql, [userId, street, city, state, zip_code, country, phone_number]);
+        await db.query(sql, [userId, street, ward, district, city, country, phone]);
         return res.status(201).json({
             success: true,
             message: "Address created successfully",
@@ -47,9 +47,9 @@ module.exports.addAddress = async (req, res) => {
 module.exports.editAddress = async (req, res) => {
     try {
         const { addressId } = req.params;
-        const { street, city, state, zip_code, country, phone_number } = req.body;
+        const { street, ward, district, city, country, phone } = req.body;
 
-        if (!street || !city || !state || !zip_code || !country || !phone_number) {
+        if (!street || !city || !ward || !district || !country || !phone) {
             return res.json({
                 success: false,
                 message: "Please fill in all fields"
@@ -57,11 +57,11 @@ module.exports.editAddress = async (req, res) => {
         }
 
         const sql = `
-            UPDATE address SET street = ?, city = ?, state = ?, zip_code = ?, country = ?, phone_number = ?
+            UPDATE address SET street = ?, ward = ?, district = ?, city = ?, country = ?, phone = ?
             WHERE id = ?
         `;
 
-        await db.query(sql, [street, city, state, zip_code, country, phone_number, addressId]);
+        await db.query(sql, [street, ward, district, city, country, phone, addressId]);
         return res.status(200).json({
             success: true,
             message: "Address updated successfully",

@@ -2,14 +2,17 @@ const db = require('../../config/database');
 
 module.exports.createOrder = async (req, res) => {
     try {
-        const { userId, addressId, items, paymentMethod, totalPrice } = req.body;
+        const { userId, address, items, paymentMethod, totalBill } = req.body;
 
-        const [address] = await db.query("SELECT id FROM address WHERE id = ?", [addressId]);
-        if (address.length === 0) {
-            return res.status(404).json({ message: "Address not found" });
-        }
+        const sql = `
+            INSERT INTO \`order\` (user_id, payment_method, total_bill, street, ward, district, city, country, phone)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
 
-        const [order] = await db.query("INSERT INTO `order` (user_id, payment_method, total_price, address_id) VALUES (?, ?, ?, ?)", [userId, paymentMethod, totalPrice, addressId]);
+        const [order] = await db.query(
+            sql,
+            [userId, paymentMethod, totalBill, address.street, address.ward, address.district, address.city, address.country, address.phone]
+        );
         const orderId = order.insertId;
 
         for (const item of items) {
@@ -18,7 +21,7 @@ module.exports.createOrder = async (req, res) => {
 
         return res.status(201).json({
             success: true,
-            message: "Order created successfully"
+            message: "Place order successfully"
         });
     } catch (error) {
         return res.status(500).json({ message: error.message });
