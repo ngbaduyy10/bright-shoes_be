@@ -40,6 +40,18 @@ module.exports.getOrdersByUserId = async (req, res) => {
 
         const [orders] = await db.query(orderItemSql, [userId]);
 
+        for (const order of orders) {
+            const orderItemsSql = `
+                SELECT oi.*, s.name, s.image_url
+                FROM order_item oi
+                JOIN shoes s ON oi.shoes_id = s.id
+                WHERE oi.order_id = ?
+            `;
+
+            const [orderItems] = await db.query(orderItemsSql, [order.id]);
+            order.items = orderItems;
+        }
+
         return res.status(200).json({
             success: true,
             data: orders
