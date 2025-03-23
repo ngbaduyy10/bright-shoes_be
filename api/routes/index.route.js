@@ -3,6 +3,7 @@ const shoesRoutes = require('./shoes.route');
 const cartRoutes = require('./cart.route');
 const addressRoutes = require('./address.route');
 const orderRoutes = require('./order.route');
+const wishlistRoutes = require('./wishlist.route');
 
 module.exports = (app) => {
     app.use('/api/clerk', clerkRoutes);
@@ -14,4 +15,6 @@ module.exports = (app) => {
     app.use('/api/address', addressRoutes);
 
     app.use('/api/order', orderRoutes);
+
+    app.use('/api/wishlist', wishlistRoutes);
 }
