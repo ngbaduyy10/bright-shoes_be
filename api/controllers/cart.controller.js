@@ -61,7 +61,7 @@ module.exports.getCartItems = async (req, res) => {
 
         const cart = await getUpdatedCart(userId);
         if (cart.length === 0) {
-            return res.status(404).json({ message: "Cart not found" });
+            return res.json({ message: "Cart not found" });
         }
 
         const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
