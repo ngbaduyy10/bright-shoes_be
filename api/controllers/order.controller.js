@@ -60,3 +60,25 @@ module.exports.getOrdersByUserId = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
+module.exports.checkOrder = async (req, res) => {
+    try {
+        const { userId, shoesId } = req.params;
+
+        const sql = `
+            SELECT o.id
+            FROM order_item oi
+            JOIN \`order\` o ON oi.order_id = o.id
+            WHERE o.user_id = ? AND oi.shoes_id = ?
+        `;
+
+        const [orders] = await db.query(sql, [userId, shoesId]);
+
+        return res.status(200).json({
+            success: true,
+            data: orders,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
