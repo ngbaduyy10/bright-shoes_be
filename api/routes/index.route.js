@@ -7,6 +7,7 @@ const wishlistRoutes = require('./wishlist.route');
 const categoryRoutes = require('./category.route');
 const featureRoutes = require('./feature.route');
 const reviewRoutes = require('./review.route');
+const authRoutes = require('./auth.route');
 
 module.exports = (app) => {
     app.use('/api/clerk', clerkRoutes);
@@ -26,4 +27,6 @@ module.exports = (app) => {
     app.use('/api/wishlist', wishlistRoutes);
 
     app.use('/api/review', reviewRoutes);
+
+    app.use('/api/auth', authRoutes);
 }
