@@ -77,7 +77,7 @@ module.exports.adminLogin = async (req, res) => {
 
         const token = generate.jwtToken(user[0]);
 
-        return res.cookie("token", token, { httpOnly: true, secure: false }).status(200).json({
+        return res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "none" }).status(200).json({
             success: true,
             message: "Login successful",
         });
