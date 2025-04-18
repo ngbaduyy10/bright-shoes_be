@@ -98,7 +98,7 @@ module.exports.authCheck = async (req, res) => {
     try {
         const token = req.cookies.token;
         if (!token) {
-            return res.status(401).json({
+            return res.json({
                 success: false,
                 message: "Unauthorized"
             });

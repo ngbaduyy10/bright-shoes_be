@@ -82,3 +82,35 @@ module.exports.checkOrder = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
+module.exports.getAllOrders = async (req, res) => {
+    try {
+        const sql = `
+            SELECT o.*, u.first_name, u.last_name, u.email
+            FROM \`order\` o
+            JOIN user u ON o.user_id = u.id
+            ORDER BY created_at DESC
+        `;
+
+        const [orders] = await db.query(sql);
+
+        for (const order of orders) {
+            const orderItemsSql = `
+                SELECT oi.price, oi.quantity, s.name, s.image_url
+                FROM order_item oi
+                JOIN shoes s ON oi.shoes_id = s.id
+                WHERE oi.order_id = ?
+            `;
+
+            const [orderItems] = await db.query(orderItemsSql, [order.id]);
+            order.items = orderItems;
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: orders,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
