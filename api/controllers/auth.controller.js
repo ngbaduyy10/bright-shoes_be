@@ -82,7 +82,7 @@ module.exports.adminLogin = async (req, res) => {
             secure: true,
             sameSite: "none",
             domain: process.env.DOMAIN,
-            path: process.env.PATH,
+            path: "/",
         }).status(200).json({
             success: true,
             message: "Login successful",
@@ -99,7 +99,7 @@ module.exports.adminLogout = async (req, res) => {
         secure: true,
         sameSite: "none",
         domain: process.env.DOMAIN,
-        path: process.env.PATH,
+        path: "/",
     }).status(200).json({
         success: true,
         message: "Logout successful"
