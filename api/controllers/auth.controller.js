@@ -81,8 +81,6 @@ module.exports.adminLogin = async (req, res) => {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            domain: process.env.DOMAIN,
-            path: "/",
         }).status(200).json({
             success: true,
             message: "Login successful",
