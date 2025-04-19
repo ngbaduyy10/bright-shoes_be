@@ -94,12 +94,13 @@ module.exports.adminLogin = async (req, res) => {
 }
 
 module.exports.adminLogout = async (req, res) => {
-    res.clearCookie("token", {
+    res.cookie("token", "", {
         httpOnly: true,
         secure: true,
         sameSite: "none",
         path: "/",
         domain: process.env.DOMAIN,
+        expires: new Date(0),
     }).status(200).json({
         success: true,
         message: "Logout successful"
