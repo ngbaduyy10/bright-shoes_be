@@ -77,7 +77,13 @@ module.exports.adminLogin = async (req, res) => {
 
         const token = generate.jwtToken(user[0]);
 
-        return res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "none" }).status(200).json({
+        return res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            domain: process.env.DOMAIN,
+            path: process.env.PATH,
+        }).status(200).json({
             success: true,
             message: "Login successful",
         });
@@ -92,7 +98,8 @@ module.exports.adminLogout = async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        path: "/"
+        domain: process.env.DOMAIN,
+        path: process.env.PATH,
     }).status(200).json({
         success: true,
         message: "Logout successful"
