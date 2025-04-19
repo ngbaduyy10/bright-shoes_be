@@ -94,7 +94,7 @@ module.exports.adminLogin = async (req, res) => {
 }
 
 module.exports.adminLogout = async (req, res) => {
-    return res.clearCookie("token", {
+    return res.cookie("token", "", {
         httpOnly: true,
         secure: true,
         sameSite: "none",
