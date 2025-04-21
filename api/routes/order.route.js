@@ -8,4 +8,6 @@ router.get('/:id', orderController.getOrdersByUserId);
 
 router.get('/check/:userId/:shoesId', orderController.checkOrder);
 
+router.get('/', orderController.getAllOrders);
+
 module.exports = router;
