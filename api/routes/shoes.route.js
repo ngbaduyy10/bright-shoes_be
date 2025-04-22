@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const shoesController = require('../controllers/shoes.controller');
 
-router.get('/', shoesController.getShoes);
+router.post('/', shoesController.getShoes);
 
 router.get('/:id', shoesController.getShoesById);
 

@@ -2,11 +2,42 @@ const db = require('../../config/database');
 
 module.exports.getShoes = async (req, res) => {
     try {
-        const sql = `
-            SELECT * FROM shoes
-        `;
+        const { categories, sort, keyword } = req.body;
 
-        const [shoes] = await db.query(sql);
+        let sql = `SELECT * FROM shoes`;
+        let queryParams = [];
+        let whereConditions = [];
+
+        if (categories && categories.length > 0) {
+            const categoryArray = Array.isArray(categories) ? categories : categories.split(',');
+
+            if (categoryArray.length > 0) {
+                whereConditions.push(`category_id IN (${categoryArray.map(() => '?').join(',')})`);
+                queryParams = [...queryParams, ...categoryArray];
+            }
+        }
+
+        if (keyword && keyword.trim()) {
+            whereConditions.push(`(name LIKE ? OR description LIKE ?)`);
+            const searchTerm = `%${keyword.trim()}%`;
+            queryParams.push(searchTerm, searchTerm);
+        }
+
+        if (whereConditions.length > 0) {
+            sql += ` WHERE ${whereConditions.join(' AND ')}`;
+        }
+
+        if (sort && sort !== 'default') {
+            const [field, order] = sort.split('-');
+            const allowedFields = ['price'];
+            const allowedOrders = ['asc', 'desc'];
+
+            if (allowedFields.includes(field) && allowedOrders.includes(order.toLowerCase())) {
+                sql += ` ORDER BY ${field} ${order.toUpperCase()}`;
+            }
+        }
+
+        const [shoes] = await db.query(sql, queryParams);
         shoes.forEach(item => {
             item.size = JSON.parse(item.size);
         });
