@@ -114,3 +114,25 @@ module.exports.getAllOrders = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
+module.exports.updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { status } = req.body;
+
+        const sql = `
+            UPDATE \`order\`
+            SET status = ?
+            WHERE id = ?
+        `;
+
+        await db.query(sql, [status, orderId]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Update order status successfully"
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}

@@ -10,4 +10,6 @@ router.get('/check/:userId/:shoesId', orderController.checkOrder);
 
 router.get('/', orderController.getAllOrders);
 
+router.patch('/status/:orderId', orderController.updateOrderStatus);
+
 module.exports = router;
