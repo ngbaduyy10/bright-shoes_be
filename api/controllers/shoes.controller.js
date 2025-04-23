@@ -35,6 +35,8 @@ module.exports.getShoes = async (req, res) => {
             if (allowedFields.includes(field) && allowedOrders.includes(order.toLowerCase())) {
                 sql += ` ORDER BY ${field} ${order.toUpperCase()}`;
             }
+        } else {
+            sql += ` ORDER BY created_at DESC`;
         }
 
         const [shoes] = await db.query(sql, queryParams);
@@ -68,6 +70,87 @@ module.exports.getShoesById = async (req, res) => {
             success: true,
             data: shoes[0],
         });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+module.exports.createShoes = async (req, res) => {
+    try {
+        const { name, description, price, quantity, category_id, image_url } = req.body;
+
+        if (!name || !description || !price || !quantity || !category_id || !image_url) {
+            return res.json({ message: "All fields are required" });
+        }
+
+        const sizes = ["6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11"];
+        const sizeString = JSON.stringify(sizes);
+
+        const sql = `
+            INSERT INTO shoes (name, description, price, quantity, category_id, image_url, size)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const [result] = await db.query(sql, [name, description, price, quantity, category_id, image_url, sizeString]);
+        return res.status(201).json({
+            success: true,
+            message: "Shoes created successfully",
+            data: {
+                id: result.insertId,
+                name,
+                description,
+                price,
+                quantity,
+                category_id,
+                image_url,
+            },
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+module.exports.updateShoes = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, description, price, quantity, category_id, image_url } = req.body;
+
+        if (!name || !description || !price || !quantity || !category_id || !image_url) {
+            return res.json({ message: "All fields are required" });
+        }
+
+        const sql = `
+            UPDATE shoes
+            SET name = ?, description = ?, price = ?, quantity = ?, category_id = ?, image_url = ?
+            WHERE id = ?
+        `;
+
+        await db.query(sql, [name, description, price, quantity, category_id, image_url, id]);
+        return res.status(200).json({
+            success: true,
+            message: "Shoes updated successfully",
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+module.exports.deleteShoes = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const sql = `
+            DELETE FROM shoes WHERE id = ?
+        `;
+
+        await db.query(sql, [id]);
+        return res.status(200).json({
+            success: true,
+            message: "Shoes deleted successfully",
+        });
+
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
