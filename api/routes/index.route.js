@@ -9,6 +9,7 @@ const featureRoutes = require('./feature.route');
 const reviewRoutes = require('./review.route');
 const authRoutes = require('./auth.route');
 const userRoutes = require('./user.route');
+const discountRoutes = require('./discount.route');
 
 module.exports = (app) => {
     app.use('/api/clerk', clerkRoutes);
@@ -32,4 +33,6 @@ module.exports = (app) => {
     app.use('/api/auth', authRoutes);
 
     app.use('/api/user', userRoutes);
+
+    app.use('/api/discount', discountRoutes);
 }
