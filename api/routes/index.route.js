@@ -8,6 +8,7 @@ const categoryRoutes = require('./category.route');
 const featureRoutes = require('./feature.route');
 const reviewRoutes = require('./review.route');
 const authRoutes = require('./auth.route');
+const userRoutes = require('./user.route');
 
 module.exports = (app) => {
     app.use('/api/clerk', clerkRoutes);
@@ -29,4 +30,6 @@ module.exports = (app) => {
     app.use('/api/review', reviewRoutes);
 
     app.use('/api/auth', authRoutes);
+
+    app.use('/api/user', userRoutes);
 }
