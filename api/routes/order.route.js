@@ -12,4 +12,8 @@ router.get('/', orderController.getAllOrders);
 
 router.patch('/status/:orderId', orderController.updateOrderStatus);
 
+router.get('/revenue/weekly', orderController.getWeeklyRevenue);
+
+router.get('/status/data', orderController.getStatusData);
+
 module.exports = router;

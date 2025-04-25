@@ -136,3 +136,58 @@ module.exports.updateOrderStatus = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
+module.exports.getWeeklyRevenue = async (req, res) => {
+    try {
+        const sql = `
+            SELECT YEARWEEK(created_at, 1)                  AS year_week,
+                   MIN(DATE_FORMAT(created_at, '%Y-%m-%d')) AS week_start_date,
+                   SUM(total_bill)                          AS total
+            FROM \`order\`
+            WHERE created_at >= DATE (NOW()) - INTERVAL 8 WEEK
+            GROUP BY YEARWEEK(created_at, 1)
+            ORDER BY year_week DESC
+        `;
+
+        const [revenue] = await db.query(sql);
+
+        return res.status(200).json({
+            success: true,
+            data: revenue,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+module.exports.getStatusData = async (req, res) => {
+    //get number of orders in each status, if status has no orders, still get and return 0
+    try {
+        const sql = `
+            SELECT status, COUNT(*) AS count
+            FROM \`order\`
+            GROUP BY status
+        `;
+
+        const [statusData] = await db.query(sql);
+
+        const statusMap = {
+            "pending": 0,
+            "processing": 0,
+            "shipping": 0,
+            "delivered": 0,
+            "cancelled": 0
+        };
+
+        for (const status of statusData) {
+            statusMap[status.status] = status.count;
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: statusMap,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
