@@ -8,6 +8,7 @@ module.exports.jwtToken = (user) => {
             first_name: user.first_name,
             last_name: user.last_name,
             role: user.role,
+            image_url: user.image_url || null,
         },
         process.env.SECRET_JWT,
         {
