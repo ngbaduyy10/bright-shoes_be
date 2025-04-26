@@ -85,14 +85,38 @@ module.exports.checkOrder = async (req, res) => {
 
 module.exports.getAllOrders = async (req, res) => {
     try {
+        const { keyword, status } = req.query;
+
+        let conditions = [];
+        let params = [];
+
+        if (keyword) {
+            conditions.push(`(
+                o.id LIKE ? OR 
+                u.first_name LIKE ? OR 
+                u.last_name LIKE ? OR 
+                u.email LIKE ?
+            )`);
+            const keywordPattern = `%${keyword}%`;
+            params.push(keywordPattern, keywordPattern, keywordPattern, keywordPattern);
+        }
+
+        if (status && status !== 'all') {
+            conditions.push(`o.status = ?`);
+            params.push(status);
+        }
+
+        const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
         const sql = `
             SELECT o.*, u.first_name, u.last_name, u.email
             FROM \`order\` o
             JOIN user u ON o.user_id = u.id
-            ORDER BY created_at DESC
+            ${whereClause}
+            ORDER BY o.created_at DESC
         `;
 
-        const [orders] = await db.query(sql);
+        const [orders] = await db.query(sql, params);
 
         for (const order of orders) {
             const orderItemsSql = `
@@ -101,7 +125,6 @@ module.exports.getAllOrders = async (req, res) => {
                 JOIN shoes s ON oi.shoes_id = s.id
                 WHERE oi.order_id = ?
             `;
-
             const [orderItems] = await db.query(orderItemsSql, [order.id]);
             order.items = orderItems;
         }
