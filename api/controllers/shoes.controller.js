@@ -29,7 +29,7 @@ module.exports.getShoes = async (req, res) => {
 
         if (sort && sort !== 'default') {
             const [field, order] = sort.split('-');
-            const allowedFields = ['price'];
+            const allowedFields = ['price', 'rating'];
             const allowedOrders = ['asc', 'desc'];
 
             if (allowedFields.includes(field) && allowedOrders.includes(order.toLowerCase())) {
