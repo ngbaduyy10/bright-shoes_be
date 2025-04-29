@@ -2,16 +2,20 @@ const db = require('../../config/database');
 
 module.exports.createOrder = async (req, res) => {
     try {
-        const { userId, address, items, paymentMethod, totalBill } = req.body;
+        const { userId, address, items, paymentMethod, totalBill, discountBill } = req.body;
+
+        if (!userId || !address || !items || !paymentMethod || !totalBill) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
 
         const sql = `
-            INSERT INTO \`order\` (user_id, payment_method, total_bill, street, ward, district, city, country, phone)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO \`order\` (user_id, payment_method, total_bill, street, ward, district, city, country, phone, discount_bill)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const [order] = await db.query(
             sql,
-            [userId, paymentMethod, totalBill, address.street, address.ward, address.district, address.city, address.country, address.phone]
+            [userId, paymentMethod, totalBill, address.street, address.ward, address.district, address.city, address.country, address.phone, discountBill]
         );
         const orderId = order.insertId;
 
