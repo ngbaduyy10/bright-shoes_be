@@ -1,4 +1,5 @@
 const db = require('../../config/database');
+const { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } = require('vnpay');
 
 module.exports.createOrder = async (req, res) => {
     try {
@@ -23,10 +24,75 @@ module.exports.createOrder = async (req, res) => {
             await db.query("INSERT INTO order_item (order_id, shoes_id, quantity, price) VALUES (?, ?, ?, ?)", [orderId, item.shoes_id, item.quantity, item.price]);
         }
 
-        return res.status(201).json({
-            success: true,
-            message: "Place order successfully"
-        });
+        if (paymentMethod === "cod") {
+            return res.status(201).json({
+                success: true,
+                message: "Place order successfully"
+            });
+        }
+
+        if (paymentMethod === "vnpay") {
+            const vnpay = new VNPay({
+                tmnCode: process.env.VNPAY_TMN_CODE,
+                secureSecret: process.env.VNPAY_HASH_SECRET,
+                vnpayHost: process.env.VNPAY_HOST,
+                testMode: true,
+                hashAlgorithm: 'SHA512',
+                enableLog: true,
+                loggerFn: ignoreLogger,
+            });
+
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            //Convert USD to VND
+            const exchangeRate = 25000;
+            const totalBillVND = totalBill * exchangeRate;
+            const discountBillVND = discountBill * exchangeRate;
+
+            const paymentUrl = vnpay.buildPaymentUrl({
+                vnp_Amount: discountBillVND || totalBillVND,
+                vnp_IpAddr: req.ip,
+                vnp_TxnRef: orderId,
+                vnp_OrderInfo: `Order ID: ${orderId}`,
+                vnp_OrderType: ProductCode.Other,
+                vnp_ReturnUrl: `${process.env.FRONTEND_URL}/vnpay-verify`,
+                vnp_Locale: VnpLocale.EN,
+                vnp_CreateDate: dateFormat(new Date()),
+                vnp_ExpireDate: dateFormat(tomorrow),
+            });
+
+            return res.status(200).json({
+                success: true,
+                url: paymentUrl,
+            })
+        }
+
+        return res.status(400).json({ message: "Invalid payment method" });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+module.exports.vnpayPaymentVerify = async (req, res) => {
+    try {
+        const { vnp_ResponseCode, vnp_TxnRef } = req.query;
+        if (vnp_ResponseCode !== '00') {
+            const sql = `
+                DELETE FROM \`order\`
+                WHERE id = ?
+            `;
+            await db.query(sql, [vnp_TxnRef]);
+            return res.json({
+                success: false,
+                message: "Payment failed"
+            });
+        } else {
+            return res.json({
+                success: true,
+                message: "Payment successful"
+            });
+        }
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
